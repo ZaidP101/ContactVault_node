@@ -1,11 +1,11 @@
 const asyncHandler = require("express-async-handler");
-const contact = require("../models/contactModels");
+const Contact = require("../models/contactModels");
 const contactModels = require("../models/contactModels");
 
 //GET
 const getContacts = asyncHandler(async(req,res)=>{
-    const contact = await contact.find();
-    res.status(201).json(contact);
+    const contact = await Contact.find();
+    res.status(200).json(contact);
 });
 
 
@@ -19,22 +19,49 @@ const creatContact = asyncHandler(async(req,res)=>{
         res.status(400);
         throw new Error("All fields are mandatory..");
     }
-    res.json({message: "Creat Contacts"});
+    const contact = await Contact.create({
+        name,
+        email,
+        phone
+    });
+    res.status(201).json(contact);
 });
 
 //Get
 const getContact = asyncHandler(async(req,res)=>{
-    res.json({message: `Get Contacts for ${req.params.id}`});
+    const contact = await Contact.findById(req.params.id);
+    if(!contact){
+        res.status(404);
+        throw new Error("Conatct not found ");
+    }
+    res.status(200).json(contact);
 });
 
 //Update
 const updateContact = asyncHandler(async(req,res)=>{
-    res.json({message: `Update Contacts for ${req.params.id}`});
+    const contact = Contact.findById(req.params.id);
+    if(!contact){
+        res.status(404);
+        throw new Error("Contact not found");
+    }
+    const updatedContact = await Contact.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {new: true}
+    )
+    res.status(200).json(updatedContact);
 });
 
-//Delete
-const deleteContact = asyncHandler(async(req,res)=>{
-    res.json({message: `Delete contact for ${req.params.id}`});
+const deleteContact = asyncHandler(async (req, res) => {
+    const contact = await Contact.findById(req.params.id);
+    if (!contact) {
+        res.status(404);
+        throw new Error("Contact not found");
+    }
+
+    // Remove the contact
+    await Contact.findByIdAndDelete(req.params.id); // Use instance method for removing the document
+    res.status(200).json(contact);
 });
 
 module.exports = {getContacts, creatContact, getContact, updateContact, deleteContact};
