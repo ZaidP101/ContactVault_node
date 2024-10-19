@@ -4,7 +4,7 @@ const contactModels = require("../models/contactModels");
 
 //GET
 const getContacts = asyncHandler(async(req,res)=>{
-    const contact = await Contact.find();
+    const contact = await Contact.find({user_id:req.user.id});
     res.status(200).json(contact);
 });
 
@@ -22,7 +22,8 @@ const creatContact = asyncHandler(async(req,res)=>{
     const contact = await Contact.create({
         name,
         email,
-        phone
+        phone,
+        user_id:req.user.id
     });
     res.status(201).json(contact);
 });
@@ -44,6 +45,10 @@ const updateContact = asyncHandler(async(req,res)=>{
         res.status(404);
         throw new Error("Contact not found");
     }
+    if(contact.user_id.toString() !== req.user.id){
+        res.status(403);
+        throw new Error("User have no permission to update other users contacl");
+    }
     const updatedContact = await Contact.findByIdAndUpdate(
         req.params.id,
         req.body,
@@ -58,7 +63,10 @@ const deleteContact = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Contact not found");
     }
-
+    if(contact.user_id.toString() !== req.user.id){
+        res.status(403);
+        throw new Error("User have no permission to delete other users contacl");
+    }
     // Remove the contact
     await Contact.findByIdAndDelete(req.params.id); // Use instance method for removing the document
     res.status(200).json(contact);

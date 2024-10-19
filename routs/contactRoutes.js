@@ -5,8 +5,10 @@ const {creatContact} = require("../controllers/contactController");
 const {getContact} = require("../controllers/contactController");
 const {updateContact} = require("../controllers/contactController");
 const {deleteContact} = require("../controllers/contactController");
+const validateToken = require("../middleware/validateTokenHandler");
 
 
+route1.use(validateToken);
 route1.route("/").get(getContacts);
 
 route1.route("/").post(creatContact);
